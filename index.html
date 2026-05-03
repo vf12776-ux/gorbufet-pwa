@@ -5,63 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Алкобуфет</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#ff6600">
     <style>
         body {
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #1a1a1a;
+            font-family: system-ui, sans-serif;
+            background: #111;
             color: #fff;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            text-align: center;
         }
         .logo {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 30px;
-            letter-spacing: 2px;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 2.5rem;
+            letter-spacing: 1px;
         }
         .btn {
             display: block;
-            width: 80%;
-            max-width: 300px;
-            margin: 15px auto;
-            padding: 16px;
+            width: 85%;
+            max-width: 320px;
+            margin: 0.8rem auto;
+            padding: 1rem;
             border: none;
-            border-radius: 12px;
-            font-size: 18px;
+            border-radius: 14px;
+            font-size: 1.2rem;
             font-weight: bold;
+            text-align: center;
             text-decoration: none;
             color: #fff;
             background: #ff6600;
+            transition: 0.2s;
             cursor: pointer;
-            transition: background 0.3s;
         }
-        .btn:active {
-            background: #e55d00;
-        }
-        .btn-phone {
-            background: #4CAF50;
-        }
-        .btn-phone:active {
-            background: #43a047;
+        .btn:active { background: #e55d00; }
+        .btn-phone { background: #4CAF50; }
+        .btn-phone:active { background: #43a047; }
+        .install-hint {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: #aaa;
         }
     </style>
 </head>
 <body>
     <div class="logo">🔥 АЛКОБУФЕТ</div>
-    <a class="btn" href="https://taplink.cc/alkobufet.shashlik" target="_blank" rel="noopener">Выбрать и заказать</a>
+    <a class="btn" href="https://taplink.cc/alkobufet.shashlik" target="_blank" rel="noopener noreferrer">Выбрать и заказать</a>
     <a class="btn btn-phone" href="tel:+79991234567">📞 Позвонить</a>
+    <p class="install-hint">Нажмите «Установить» в меню браузера,<br>чтобы добавить на главный экран</p>
 
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .catch(err => console.log('SW not registered', err));
+            });
         }
+
+        // Стимулируем показ баннера установки (для Android)
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const hint = document.querySelector('.install-hint');
+            if (hint) hint.textContent = 'Нажмите кнопку ниже, чтобы установить приложение';
+        });
     </script>
 </body>
 </html>
