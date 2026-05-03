@@ -22,8 +22,7 @@
         .logo {
             font-size: 2.2rem;
             font-weight: 800;
-            margin-bottom: 2.5rem;
-            letter-spacing: 1px;
+            margin-bottom: 2rem;
         }
         .btn {
             display: block;
@@ -45,10 +44,15 @@
         .btn:active { background: #e55d00; }
         .btn-phone { background: #4CAF50; }
         .btn-phone:active { background: #43a047; }
-        .install-hint {
+
+        #installBtn {
+            background: #fff;
+            color: #000;
             margin-top: 2rem;
-            font-size: 0.9rem;
-            color: #aaa;
+            display: none; /* будет показана через JS */
+        }
+        #installBtn.show {
+            display: block;
         }
     </style>
 </head>
@@ -56,24 +60,41 @@
     <div class="logo">🔥 АЛКОБУФЕТ</div>
     <a class="btn" href="https://taplink.cc/alkobufet.shashlik" target="_blank" rel="noopener noreferrer">Выбрать и заказать</a>
     <a class="btn btn-phone" href="tel:+79991234567">📞 Позвонить</a>
-    <p class="install-hint">Нажмите «Установить» в меню браузера,<br>чтобы добавить на главный экран</p>
+
+    <!-- КНОПКА УСТАНОВКИ (появляется автоматически) -->
+    <button id="installBtn" class="btn">📲 Установить приложение</button>
 
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .catch(err => console.log('SW not registered', err));
-            });
-        }
-
-        // Стимулируем показ баннера установки (для Android)
         let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
+        // Событие от браузера: можно показать кнопку установки
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            const hint = document.querySelector('.install-hint');
-            if (hint) hint.textContent = 'Нажмите кнопку ниже, чтобы установить приложение';
+            installBtn.classList.add('show'); // показываем кнопку
         });
+
+        // Обработчик клика по кнопке
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`Установка: ${outcome}`);
+            deferredPrompt = null;
+            installBtn.classList.remove('show'); // скрываем после показа диалога
+        });
+
+        // Когда приложение УЖЕ установлено — скрываем кнопку
+        window.addEventListener('appinstalled', () => {
+            installBtn.classList.remove('show');
+            deferredPrompt = null;
+        });
+
+        // Регистрируем Service Worker для офлайн-режима
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
     </script>
 </body>
 </html>
