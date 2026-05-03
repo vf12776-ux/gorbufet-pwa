@@ -9,7 +9,7 @@
     <style>
         body {
             margin: 0;
-            padding: 0;
+            padding: 1.5rem;
             font-family: system-ui, sans-serif;
             background: #111;
             color: #fff;
@@ -17,16 +17,17 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
+            text-align: center;
         }
         .logo {
             font-size: 2.2rem;
             font-weight: 800;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
         .btn {
             display: block;
-            width: 85%;
+            width: 100%;
             max-width: 320px;
             margin: 0.8rem auto;
             padding: 1rem;
@@ -37,61 +38,129 @@
             text-align: center;
             text-decoration: none;
             color: #fff;
-            background: #ff6600;
             transition: 0.2s;
             cursor: pointer;
         }
-        .btn:active { background: #e55d00; }
+        .btn-order { background: #ff6600; }
+        .btn-order:active { background: #e55d00; }
         .btn-phone { background: #4CAF50; }
         .btn-phone:active { background: #43a047; }
 
         #installBtn {
             background: #fff;
             color: #000;
-            margin-top: 2rem;
-            display: none; /* будет показана через JS */
+            font-size: 1.4rem;
+            margin: 2rem auto 1rem;
+            border: 2px solid #ff6600;
+            display: none;
         }
         #installBtn.show {
             display: block;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #222;
+            padding: 1.5rem;
+            border-radius: 16px;
+            max-width: 300px;
+            text-align: left;
+            color: #fff;
+        }
+        .modal-content h3 { margin-top: 0; color: #ff6600; }
+        .modal-content ol { padding-left: 1.2rem; }
+        .modal-close {
+            background: #ff6600;
+            color: #fff;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 10px;
+            width: 100%;
+            font-weight: bold;
+            margin-top: 1rem;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div class="logo">🔥 АЛКОБУФЕТ</div>
-    <a class="btn" href="https://taplink.cc/alkobufet.shashlik" target="_blank" rel="noopener noreferrer">Выбрать и заказать</a>
-    <a class="btn btn-phone" href="tel:+79991234567">📞 Позвонить</a>
 
-    <!-- КНОПКА УСТАНОВКИ (появляется автоматически) -->
+    <!-- Кнопка УСТАНОВКИ — основная, показывается только когда нужно -->
     <button id="installBtn" class="btn">📲 Установить приложение</button>
 
+    <a class="btn btn-order" href="https://taplink.cc/alkobufet.shashlik" target="_blank" rel="noopener noreferrer">Выбрать и заказать</a>
+    <a class="btn btn-phone" href="tel:+79991234567">📞 Позвонить</a>
+
+    <!-- Модальное окно с инструкцией для iOS -->
+    <div id="iosModal" class="modal">
+        <div class="modal-content">
+            <h3>📱 Как установить на iPhone</h3>
+            <ol>
+                <li>Нажмите кнопку <strong>«Поделиться»</strong> внизу экрана (квадрат со стрелкой).</li>
+                <li>Прокрутите список и выберите <strong>«На экран «Домой»»</strong>.</li>
+                <li>Нажмите <strong>«Добавить»</strong> в верхнем правом углу.</li>
+            </ol>
+            <button class="modal-close" onclick="document.getElementById('iosModal').classList.remove('active')">Понятно</button>
+        </div>
+    </div>
+
     <script>
-        let deferredPrompt;
         const installBtn = document.getElementById('installBtn');
+        const iosModal = document.getElementById('iosModal');
+        let deferredPrompt;
 
-        // Событие от браузера: можно показать кнопку установки
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBtn.classList.add('show'); // показываем кнопку
-        });
+        // Проверяем, не открыто ли уже как PWA (standalone)
+        function isStandalone() {
+            return window.matchMedia('(display-mode: standalone)').matches 
+                || navigator.standalone 
+                || document.referrer.includes('android-app://');
+        }
 
-        // Обработчик клика по кнопке
-        installBtn.addEventListener('click', async () => {
-            if (!deferredPrompt) return;
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`Установка: ${outcome}`);
-            deferredPrompt = null;
-            installBtn.classList.remove('show'); // скрываем после показа диалога
-        });
+        // Если уже в standalone — кнопку не показываем никогда
+        if (isStandalone()) {
+            installBtn.style.display = 'none';
+        } else {
+            // Ждём возможность установки (Android)
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installBtn.classList.add('show');
+            });
 
-        // Когда приложение УЖЕ установлено — скрываем кнопку
-        window.addEventListener('appinstalled', () => {
-            installBtn.classList.remove('show');
-            deferredPrompt = null;
-        });
+            // Обработчик клика по кнопке установки
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    // Android: запускаем системный диалог
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log(`Установка: ${outcome}`);
+                    deferredPrompt = null;
+                    installBtn.classList.remove('show');
+                } else {
+                    // iOS (или другой不支持 beforeinstallprompt): показываем инструкцию
+                    iosModal.classList.add('active');
+                }
+            });
 
-        // Регистрируем Service Worker для офлайн-режима
+            // Скрываем кнопку после успешной установки (Android)
+            window.addEventListener('appinstalled', () => {
+                installBtn.classList.remove('show');
+                deferredPrompt = null;
+            });
+        }
+
+        // Регистрируем Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js');
         }
