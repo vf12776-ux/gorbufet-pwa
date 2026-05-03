@@ -2,20 +2,22 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Алкобуфет</title>
     <link rel="manifest" href="manifest.json">
-    <meta http-equiv="refresh" content="0; url=https://taplink.cc/alkobufet.shashlik">
+    <meta name="theme-color" content="#000000">
     <style>
-        body {
-            font-family: sans-serif;
-            text-align: center;
-            padding-top: 20%;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body, iframe { width: 100%; height: 100%; border: none; overflow: hidden; }
+        body { background: #000; }
     </style>
 </head>
 <body>
-    <p>Загрузка...</p>
-    <p><a href="https://taplink.cc/alkobufet.shashlik">Нажмите сюда, если переход не произошёл</a></p>
+    <iframe src="https://taplink.cc/alkobufet.shashlik" allow="geolocation; camera; microphone; payment"></iframe>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
 </body>
 </html>
