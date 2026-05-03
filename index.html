@@ -2,18 +2,62 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Алкобуфет</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body, iframe { width: 100%; height: 100%; border: none; overflow: hidden; }
-        body { background: #000; }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+        .btn {
+            display: block;
+            width: 80%;
+            max-width: 300px;
+            margin: 15px auto;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #fff;
+            background: #ff6600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn:active {
+            background: #e55d00;
+        }
+        .btn-phone {
+            background: #4CAF50;
+        }
+        .btn-phone:active {
+            background: #43a047;
+        }
     </style>
 </head>
 <body>
-    <iframe src="https://taplink.cc/alkobufet.shashlik" allow="geolocation; camera; microphone; payment"></iframe>
+    <div class="logo">🔥 АЛКОБУФЕТ</div>
+    <a class="btn" href="https://taplink.cc/alkobufet.shashlik" target="_blank" rel="noopener">Выбрать и заказать</a>
+    <a class="btn btn-phone" href="tel:+79991234567">📞 Позвонить</a>
+
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js');

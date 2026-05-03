@@ -1,4 +1,3 @@
-
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open('alkobufet-v1').then((cache) => {
