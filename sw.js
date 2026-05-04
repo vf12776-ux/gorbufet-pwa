@@ -1,4 +1,4 @@
-const CACHE = 'alko-v3';
+const CACHE = 'alko-v4';
 const ASSETS = [
   '/',
   '/index.html',
