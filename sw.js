@@ -1,4 +1,4 @@
-const CACHE = 'alko-v4';
+const CACHE = 'alko-v4'; // меняйте версию при каждом важном апдейте
 const ASSETS = [
   '/',
   '/index.html',
@@ -11,6 +11,8 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE).then(cache => cache.addAll(ASSETS))
   );
+  // Принудительно активируем новый воркер сразу, не дожидаясь закрытия вкладок
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
@@ -19,6 +21,8 @@ self.addEventListener('activate', event => {
       keys.filter(key => key !== CACHE).map(key => caches.delete(key))
     ))
   );
+  // Захватываем все открытые страницы под новый воркер
+  clients.claim();
 });
 
 self.addEventListener('fetch', event => {
