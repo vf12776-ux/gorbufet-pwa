@@ -58,6 +58,7 @@
             display: block;
         }
 
+        /* Модальные окна */
         .modal {
             display: none;
             position: fixed;
@@ -75,20 +76,57 @@
             padding: 1.5rem;
             border-radius: 16px;
             max-width: 300px;
+            width: 90%;
             text-align: left;
             color: #fff;
         }
-        .modal-content h3 { margin-top: 0; color: #ff6600; }
-        .modal-content ol { padding-left: 1.2rem; }
+        .modal-content h3 {
+            margin: 0 0 1rem;
+            color: #ff6600;
+            text-align: center;
+        }
         .modal-close {
-            background: #ff6600;
-            color: #fff;
+            background: transparent;
+            color: #aaa;
             border: none;
-            padding: 0.8rem;
-            border-radius: 10px;
+            font-size: 1.5rem;
+            position: absolute;
+            top: 0.5rem;
+            right: 0.8rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .modal-content {
+            position: relative;
+        }
+        .phone-option {
+            display: block;
             width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+            background: #333;
+            border: none;
+            color: #fff;
+            border-radius: 10px;
+            font-size: 1rem;
             font-weight: bold;
-            margin-top: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .phone-option:active {
+            background: #444;
+        }
+        .modal-close-btn {
+            display: block;
+            width: 100%;
+            margin-top: 0.5rem;
+            padding: 0.8rem;
+            background: #ff6600;
+            border: none;
+            color: #fff;
+            border-radius: 10px;
+            font-weight: bold;
             cursor: pointer;
         }
     </style>
@@ -96,13 +134,29 @@
 <body>
     <div class="logo">🔥 АЛКОБУФЕТ</div>
 
-    <!-- Кнопка УСТАНОВКИ — основная, показывается только когда нужно -->
+    <!-- Кнопка установки -->
     <button id="installBtn" class="btn">📲 Установить приложение</button>
 
     <a class="btn btn-order" href="https://taplink.cc/alkobufet.shashlik" target="_blank" rel="noopener noreferrer">Выбрать и заказать</a>
-    <a class="btn btn-phone" href="tel:+79991234567">📞 Позвонить</a>
+    <button class="btn btn-phone" onclick="document.getElementById('phoneModal').classList.add('active')">📞 Позвонить</button>
 
-    <!-- Модальное окно с инструкцией для iOS -->
+    <!-- Модальное окно выбора телефона -->
+    <div id="phoneModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="document.getElementById('phoneModal').classList.remove('active')">&times;</button>
+            <h3>📞 Выберите место</h3>
+            <div id="phonesList">
+    <a href="tel:+79099909310" class="phone-option">Павелецкая</a>
+    <a href="tel:+79152776884" class="phone-option">Сретенка</a>
+    <a href="tel:+79168052630" class="phone-option">Пятницкая</a>
+    <a href="tel:+79629459549" class="phone-option">Маяковская</a>
+    <a href="tel:+79258005254" class="phone-option">Кутуза</a>
+</div>
+            <button class="modal-close-btn" onclick="document.getElementById('phoneModal').classList.remove('active')">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно инструкции для iOS -->
     <div id="iosModal" class="modal">
         <div class="modal-content">
             <h3>📱 Как установить на iPhone</h3>
@@ -111,7 +165,7 @@
                 <li>Прокрутите список и выберите <strong>«На экран «Домой»»</strong>.</li>
                 <li>Нажмите <strong>«Добавить»</strong> в верхнем правом углу.</li>
             </ol>
-            <button class="modal-close" onclick="document.getElementById('iosModal').classList.remove('active')">Понятно</button>
+            <button class="modal-close-btn" onclick="document.getElementById('iosModal').classList.remove('active')">Понятно</button>
         </div>
     </div>
 
@@ -120,50 +174,57 @@
         const iosModal = document.getElementById('iosModal');
         let deferredPrompt;
 
-        // Проверяем, не открыто ли уже как PWA (standalone)
         function isStandalone() {
             return window.matchMedia('(display-mode: standalone)').matches 
                 || navigator.standalone 
                 || document.referrer.includes('android-app://');
         }
 
-        // Если уже в standalone — кнопку не показываем никогда
         if (isStandalone()) {
             installBtn.style.display = 'none';
         } else {
-            // Ждём возможность установки (Android)
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
                 installBtn.classList.add('show');
             });
 
-            // Обработчик клика по кнопке установки
             installBtn.addEventListener('click', async () => {
                 if (deferredPrompt) {
-                    // Android: запускаем системный диалог
                     deferredPrompt.prompt();
                     const { outcome } = await deferredPrompt.userChoice;
                     console.log(`Установка: ${outcome}`);
                     deferredPrompt = null;
                     installBtn.classList.remove('show');
                 } else {
-                    // iOS (или другой不支持 beforeinstallprompt): показываем инструкцию
                     iosModal.classList.add('active');
                 }
             });
 
-            // Скрываем кнопку после успешной установки (Android)
             window.addEventListener('appinstalled', () => {
                 installBtn.classList.remove('show');
                 deferredPrompt = null;
             });
         }
 
-        // Регистрируем Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js');
         }
+        if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+        reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // Новый воркер готов, можно предложить перезагрузку
+                    if (confirm('Доступна новая версия приложения. Обновить?')) {
+                        window.location.reload();
+                    }
+                }
+            });
+        });
+    });
+}
     </script>
 </body>
 </html>
